@@ -45,6 +45,10 @@ def get_neighbors(image, n_trees):
     for i in range(num_pixels):
         coords_to_stack[i] = flattened_to_coordinates(image.shape[1], i)
 
+        # Making sure coordinates are also in range 0-1
+        coords_to_stack[i][0] = coords_to_stack[i][0] / float(image.shape[0]) 
+        coords_to_stack[i][1] = coords_to_stack[i][1] / float(image.shape[1]) 
+
     features = np.hstack((np.array(coords_to_stack), rgb_features))
 
     # Building ANNOY - just using euclidean distance

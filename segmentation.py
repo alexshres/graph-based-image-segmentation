@@ -4,11 +4,11 @@ import unionfind as uf
 from utils import flattened_to_coordinates, get_neighbors, build_adj_list
 
 class SegmentImage:
-    def __init__(self, image):
+    def __init__(self, image, k):
         self.image = image
         self.size = image.shape[0] * image.shape[1]
         self.S = uf.UnionFind(self.size)
-        self.k = 300   # threshold parameter
+        self.k = k  # threshold parameter
         self.num_neighbors = 10 # number of nearest neighbors to grab
 
         ann_idx = get_neighbors(self.image, n_trees=10)

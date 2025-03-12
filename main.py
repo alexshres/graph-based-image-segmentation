@@ -6,6 +6,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import unionfind as uf
+import pprint
 
 from utils import get_image
 from segmentation import SegmentImage
@@ -17,11 +18,18 @@ def main():
     # sigma=0.8 has already been applied in the get_image function
     img = get_image(image_path)
 
-    segment = SegmentImage(img)
+    plt.imshow(img)
+    plt.axis("off")
+    plt.title("Elephant Image Blurred w/ sigma=0.8")
+    plt.show()
+
+    print(f"{img.shape=}\n{img.shape[0]*img.shape[1]}")
+
+    segment = SegmentImage(img, k=100)
+    segment.build_segments()
 
 
-
-    print("Finished testing nbrs from ann_idx.get_nns_by_item")
+    pprint.pprint(segment.S.component_sizes)
 
 
 

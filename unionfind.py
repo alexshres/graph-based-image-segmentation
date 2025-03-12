@@ -28,17 +28,18 @@ class UnionFind:
 
 
     def find(self, ele):
-        if self.nodes[ele].parent != ele:
+        val = int(ele)
+        if self.nodes[val].parent != val: 
             # This optimization will help prevent find function from 
             # having same complexity as DFS for large UnionFinds
-            self.nodes[ele].parent = self.find(self.nodes[ele].parent)
+            self.nodes[val].parent = int(self.find(self.nodes[val].parent))
 
-        return self.nodes[ele].parent
+        return self.nodes[val].parent
 
     
     def union(self, ele1, ele2, int_diff):
-        comp1 = self.find(ele1)
-        comp2 = self.find(ele2)
+        comp1 = self.find(int(ele1))
+        comp2 = self.find(int(ele2))
 
         # Always merges smaller component into larger component
         # optimizes tree height to be as small as possible
