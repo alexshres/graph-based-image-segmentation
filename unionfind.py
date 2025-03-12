@@ -41,7 +41,7 @@ class UnionFind:
         comp2 = find(ele2)
 
         # Always merges smaller component into larger component
-        # optimizes the tree to be as small as possible
+        # optimizes tree height to be as small as possible
         if self.component_sizes[comp1] < self.component_sizes[comp2]:
             comp1, comp2 = comp2, comp1
 
