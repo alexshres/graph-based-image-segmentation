@@ -31,7 +31,7 @@ class UnionFind:
         if self.nodes[ele].parent != ele:
             # This optimization will help prevent find function from 
             # having same complexity as DFS for large UnionFinds
-            self.nodes[ele].parent = find(self.nodes[ele].parent)
+            self.nodes[ele].parent = self.find(self.nodes[ele].parent)
 
         return self.nodes[ele].parent
 
