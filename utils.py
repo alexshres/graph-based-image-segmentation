@@ -1,5 +1,6 @@
 # FILE: utils.py
 # Contains helper functions for the program
+
 import cv2
 import numpy as np
 from annoy import AnnoyIndex
@@ -15,8 +16,11 @@ def get_image(path):
 
     img = img.astype(np.float32)
     img = img/255.0
+    sigma = 0.8 # based on the paper
 
-    return np.clip(img, 0.0, 1.0)
+    blurred_img = cv2.GaussianBlur(img, (0, 0), sigma)
+
+    return np.clip(blurred_img, 0.0, 1.0)
 
 def flattened_to_coordinates(width, idx):
     col = idx % width
@@ -70,7 +74,7 @@ def build_adj_list(ann_idx, num_pixels, k):
     adjacency = []
 
     for i in range(num_pixels):
-        neighbors, distances = ann_idx.get_nns_by_item(0, k+1, include_distances=True)
+        neighbors, distances = ann_idx.get_nns_by_item(i, k+1, include_distances=True)
 
         # annoy can return pixel itself as nearest neighbor (hence k+1)
         if neighbors[0] == i:

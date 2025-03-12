@@ -33,12 +33,12 @@ class UnionFind:
             # having same complexity as DFS for large UnionFinds
             self.nodes[ele].parent = find(self.nodes[ele].parent)
 
-        return self.elements[ele].parent
+        return self.nodes[ele].parent
 
     
     def union(self, ele1, ele2, int_diff):
-        comp1 = find(ele1)
-        comp2 = find(ele2)
+        comp1 = self.find(ele1)
+        comp2 = self.find(ele2)
 
         # Always merges smaller component into larger component
         # optimizes tree height to be as small as possible
