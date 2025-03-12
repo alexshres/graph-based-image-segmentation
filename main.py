@@ -7,11 +7,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import unionfind as uf
-import utils
+# import utils
 
 
 def main():
-    print("hello")
+    test_node = uf.Node(5)
+    print(f"{test_node=}")
+
+    test_unionfind = uf.UnionFind(5)
+
+    print(f"{test_unionfind.elements=}\n")
+    print(f"{test_unionfind.component_size=}\n")
+    print(f"{test_unionfind.internal_diff=}\n")
 
 
 
