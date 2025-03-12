@@ -1,8 +1,22 @@
 # FILE: utils.py
 # Contains helper functions for the program
-
+import cv2
+import numpy as np
 from annoy import AnnoyIndex
 
+def get_image(path):
+    """
+    Grabs image from path returns it
+    in RGB format normalized between 0 and 1
+    """
+
+    img = cv2.imread(path)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    img = img.astype(np.float32)
+    img = img/255.0
+
+    return np.clip(img, 0.0, 1.0)
 
 def flattened_to_coordinates(width, idx):
     col = idx % width
@@ -25,7 +39,7 @@ def get_neighbors(image, n_trees):
     coords_to_stack = [None for i in range(num_pixels)]
 
     for i in range(num_pixels):
-        coords_to_stack[i] = flattened_to_coordinate(image.shape[1], i)
+        coords_to_stack[i] = flattened_to_coordinates(image.shape[1], i)
 
     features = np.hstack((np.array(coords_to_stack), rgb_features))
 
@@ -36,7 +50,7 @@ def get_neighbors(image, n_trees):
         ann_idx.add_item(i, features[i])
 
 
-    ann_idx.build_trees(n_trees)
+    ann_idx.build(n_trees)
 
     # Return ann_idx so we can query it in the Segmentation class
     return ann_idx

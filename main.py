@@ -5,20 +5,20 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-
 import unionfind as uf
-# import utils
 
+from utils import get_image
+from segmentation import SegmentImage
 
 def main():
-    test_node = uf.Node(5)
-    print(f"{test_node=}")
+    image_path = "./images/elephant.jpg"
 
-    test_unionfind = uf.UnionFind(5)
+    img = get_image(image_path)
 
-    print(f"{test_unionfind.elements=}\n")
-    print(f"{test_unionfind.component_size=}\n")
-    print(f"{test_unionfind.internal_diff=}\n")
+    test_segment = SegmentImage(img)
+
+
+    print("Finished testing nbrs from ann_idx.get_nns_by_item")
 
 
 

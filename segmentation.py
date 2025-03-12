@@ -13,9 +13,9 @@ class SegmentImage:
 
         ann_idx = get_neighbors(self.image, n_trees=10)
 
-        for i in range(self.size):
-            nbrs = ann_idx.get_nns_by_item(i, self.k, include_distances=True)
-            print(f"{nbrs=}")
+#        for i in range(self.size):
+        nbrs = ann_idx.get_nns_by_item(0, self.k, include_distances=True)
+        print(f"{nbrs=}")
 
 
 
