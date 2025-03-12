@@ -1,0 +1,55 @@
+# FILE: utils.py
+# Contains helper functions for the program
+
+from annoy import AnnoyIndex
+
+
+def flattened_to_coordinates(width, idx):
+    col = idx % width
+    row = idx // width
+
+    return [row, col]
+
+
+
+def get_neighbors(image, n_trees):
+    img_to_manip = np.copy(image)
+
+    num_pixels = image.shape[0] * image.shape[1]
+
+    # Each pixel is now of the format (r, g, b)
+    # We want to get it to (row, col, r, g, b)
+    rgb_features = img_to_manip.reshape(num_pixels, 3)
+
+
+    coords_to_stack = [None for i in range(num_pixels)]
+
+    for i in range(num_pixels):
+        coords_to_stack[i] = flattened_to_coordinate(image.shape[1], i)
+
+    features = np.hstack((np.array(coords_to_stack), rgb_features))
+
+    # Building ANNOY - just using euclidean distance
+    ann_idx = AnnoyIndex(5, 'euclidean')
+
+    for i in range(num_pixels):
+        ann_idx.add_item(i, features[i])
+
+
+    ann_idx.build_trees(n_trees)
+
+    # Return ann_idx so we can query it in the Segmentation class
+    return ann_idx
+
+
+
+
+
+    
+
+
+
+
+
+
+
