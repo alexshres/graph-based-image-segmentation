@@ -56,6 +56,36 @@ def get_neighbors(image, n_trees):
     return ann_idx
 
 
+def build_adj_list(ann_idx, num_pixels, k):
+    """
+    ann_idx is the AnnoyIndex after building,
+    num_pixels is the total number of pixels (items) in it,
+    k is how many neighbors to retrieve for each pixel.
+    
+    Returns a NumPy array of shape (num_pixels * k, 3)
+    with rows = [pixel, neighbor, distance] 
+    sorted by distance
+    """
+
+    adjacency = []
+
+    for i in range(num_pixels):
+        neighbors, distances = ann_idx.get_nns_by_item(0, k+1, include_distances=True)
+
+        # annoy can return pixel itself as nearest neighbor (hence k+1)
+        if neighbors[0] == i:
+            neighbors = neighbors[1:]
+            distances = distances[1:]
+
+        # Grabbing [pixel, neighbor, distance]
+        for nbr, dist in zip(neighbors, distances):
+            adjacency.append([i, nbr, dist])
+    
+    # Sorting by distance (or weight) as specified by paper
+    np_adj = np.array(adjacency)
+    adj_sorted = np_adj[np_adj[:, 2].argsort()]
+
+    return adj_sorted
 
 
 
