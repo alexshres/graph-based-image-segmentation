@@ -9,7 +9,7 @@ class SegmentImage:
         self.size = image.shape[0] * image.shape[1]
         self.S = uf.UnionFind(self.size)
         self.k = 300   # threshold parameter
-self.num_neighbors = 10 # number of nearest neighbors to grab
+        self.num_neighbors = 10 # number of nearest neighbors to grab
 
         ann_idx = get_neighbors(self.image, n_trees=10)
 
