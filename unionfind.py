@@ -32,8 +32,6 @@ class UnionFind:
             self.comp_colors[i] = np.random.randint(0, 256, 3)
 
 
-
-
     def find(self, ele):
         val = int(ele)
         if self.nodes[val].parent != val: 
@@ -61,14 +59,11 @@ class UnionFind:
         # can calculate the new internal difference outside
         # and pass it in as a parameter
         self.internal_diff[comp1] = int_diff
-
         
         if comp2 in self.component_sizes:
             # slightly faster than using _ = self.component_sizes.pop(comp2)
             del self.component_sizes[comp2]
-        
         if comp2 in self.internal_diff:
             del self.internal_diff[comp2]
-
         if comp2 in self.comp_colors:
             del self.comp_colors[comp2]
