@@ -26,7 +26,12 @@ def main():
     print(f"{img.shape=}\n{img.shape[0]*img.shape[1]}")
 
     segment = SegmentImage(img, k=100)
-    segment.build_segments()
+    segmented_img = segment.segmented_img()
+
+    plt.imshow(segmented_img)
+    plt.axis("off")
+    plt.title("Segmented Elephant Image")
+    plt.show()
 
 
     pprint.pprint(segment.S.component_sizes)

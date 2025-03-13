@@ -18,6 +18,7 @@ class UnionFind:
         self.nodes = [Node(i) for i in range(num_pixels)]
         self.component_sizes = dict() 
         self.internal_diff = dict()
+        self.comp_colors = dict()
 
         for i in range(num_pixels):
             # Setting each pixel as a component with size 1
@@ -25,6 +26,12 @@ class UnionFind:
 
             # Setting each component's internal difference as 0
             self.internal_diff[i] = 0
+
+            # Each component will have its own specific color for final 
+            # segmented image
+            self.comp_colors[i] = np.random.randint(0, 256, 3)
+
+
 
 
     def find(self, ele):
@@ -62,3 +69,6 @@ class UnionFind:
         
         if comp2 in self.internal_diff:
             del self.internal_diff[comp2]
+
+        if comp2 in self.comp_colors:
+            del self.comp_colors[comp2]

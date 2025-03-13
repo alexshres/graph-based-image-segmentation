@@ -16,7 +16,7 @@ class SegmentImage:
         # This adjacency list is already sorted
         self.adjacency_list = build_adj_list(ann_idx, self.size, self.num_neighbors)
 
-    def build_segments(self):
+    def _build_segments(self):
         """
         Builds the segmentation
         """
@@ -44,4 +44,23 @@ class SegmentImage:
                     # new internal difference is max of the three possible int_diffs
                     new_int_diff = max(weight, int_C1, int_C2)
                     self.S.union(comp1, comp2, new_int_diff)
+
+    def segmented_image(self):
+        # build segments
+        self._build_segments() # Now image is segmented into components
+
+
+        segmented_img = np.zeros_like(self.image)
+
+        for i in range(self.size):
+            coords = flattened_to_coordinates(self.image.shape[1], i)
+
+            comp = self.S.find(i)
+            color = self.S.comp_colors[comp]
+
+            segmented_img[coords[0], coords[1]] = color
+
+
+        return np.clip(segmented_img, 0, 255).astype(np.uint8)
+
                     
