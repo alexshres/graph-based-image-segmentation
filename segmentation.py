@@ -19,10 +19,14 @@ class SegmentImage:
             # This adjacency list is already sorted
             self.adjacency_list = build_nn_adj_list(ann_idx, self.size, self.num_neighbors)
 
+        self.adjacency_list[:, 2] *= 255
+
     def _build_segments(self):
         """
         Builds the segmentation
         """
+        
+        self.adjacency_list = self.adjacency_list[np.argsort(self.adjacency_list[:, 2])]
 
         for i in range(len(self.adjacency_list)):
             val1 = self.adjacency_list[i][0]
