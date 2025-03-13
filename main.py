@@ -18,7 +18,7 @@ def main():
     # sigma=0.8 has already been applied in the get_image function
     img = get_image(image_path)
 
-    segment = SegmentImage(img, k=300, type="grid")
+    segment = SegmentImage(img, k=300, type="nn")
     segmented_img = segment.segmented_image()
 
     plt.imshow(segmented_img)
