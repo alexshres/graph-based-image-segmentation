@@ -29,7 +29,6 @@ def flattened_to_coordinates(width, idx):
     return [row, col]
 
 
-
 def get_neighbors(image, n_trees):
     img_to_manip = np.copy(image)
 
@@ -64,7 +63,7 @@ def get_neighbors(image, n_trees):
     return ann_idx
 
 
-def build_adj_list(ann_idx, num_pixels, k):
+def build_nn_adj_list(ann_idx, num_pixels, k):
     """
     ann_idx is the AnnoyIndex after building,
     num_pixels is the total number of pixels (items) in it,
@@ -97,11 +96,60 @@ def build_adj_list(ann_idx, num_pixels, k):
 
 
 
+def build_grid_adj_list(image, connectivity=4):
+    """
+    Builds an adjacency list for a grid-based image segmentation.
+    You can choose 4- or 8-connected neighbors.
     
+    Returns adjacency_sorted where each value is [pixel_index, neighbor_index, edge_weight].
+    Sorted in ascending order by the edge weight.
+    """
+    H, W = image.shape[:2]
+    num_pixels = H * W
 
+    # Decide neighbor offsets for 4 or 8 connectivity
+    if connectivity == 4:
+        # up, down, left, right
+        offsets = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    elif connectivity == 8:
+        # 8-connected neighbors (including diagonals)
+        offsets = [
+            (-1,  0), (1,  0), (0, -1), (0,  1),   # up, down, left, right
+            (-1, -1), (-1,  1), (1, -1), (1,  1)  # diagonals
+        ]
+    else:
+        raise ValueError("connectivity must be 4 or 8.")
 
+    adjacency = []
 
+    # Loop through each pixel index
+    for idx in range(num_pixels):
+        # Convert index -> (row, col) 
+        row, col = flattened_to_coordinates(W, idx)
 
+        # Current pixel value 
+        center_val = image[row, col]
 
+        # For each valid neighbor in the chosen offsets
+        for dr, dc in offsets:
+            nr, nc = row + dr, col + dc
 
+            # Check boundaries
+            if 0 <= nr < H and 0 <= nc < W:
+                # Convert (nr, nc) back to flattened index
+                neighbor_idx = nr * W + nc
+                neighbor_val = image[nr, nc]
+
+                # Compute Euclidean distance
+                diff = center_val - neighbor_val
+                # If it's grayscale, diff is a scalar. If color, diff is a vector.
+                # np.sum(diff*diff) or use np.linalg.norm
+                weight = np.sqrt(np.sum(diff * diff))
+
+                adjacency.append([idx, neighbor_idx, weight])
+
+    adjacency_arr = np.array(adjacency, dtype=np.float32)
+    adjacency_sorted = adjacency_arr[adjacency_arr[:, 2].argsort()]
+
+    return adjacency_sorted
 

@@ -1,20 +1,24 @@
 import numpy as np
 import unionfind as uf
 
-from utils import flattened_to_coordinates, get_neighbors, build_adj_list
+from utils import * 
+                 
 
 class SegmentImage:
-    def __init__(self, image, k):
+    def __init__(self, image, k=300, num_neighbors=10, type='grid'):
         self.image = image
         self.size = image.shape[0] * image.shape[1]
         self.S = uf.UnionFind(self.size)
         self.k = k  # threshold parameter
-        self.num_neighbors = 10 # number of nearest neighbors to grab
+        self.num_neighbors = num_neighbors # number of nearest neighbors to grab
+        self.adjacency_list = None
 
-        ann_idx = get_neighbors(self.image, n_trees=10)
-
-        # This adjacency list is already sorted
-        self.adjacency_list = build_adj_list(ann_idx, self.size, self.num_neighbors)
+        if type == "grid":
+            self.adjacency_list = build_grid_adj_list(self.image)
+        else:
+            ann_idx = get_neighbors(self.image, n_trees=10)
+            # This adjacency list is already sorted
+            self.adjacency_list = build_nn_adj_list(ann_idx, self.size, self.num_neighbors)
 
     def _build_segments(self):
         """
@@ -44,6 +48,7 @@ class SegmentImage:
                     # new internal difference is max of the three possible int_diffs
                     new_int_diff = max(weight, int_C1, int_C2)
                     self.S.union(comp1, comp2, new_int_diff)
+
 
     def segmented_image(self):
         # build segments

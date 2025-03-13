@@ -18,15 +18,8 @@ def main():
     # sigma=0.8 has already been applied in the get_image function
     img = get_image(image_path)
 
-    plt.imshow(img)
-    plt.axis("off")
-    plt.title("Elephant Image Blurred w/ sigma=0.8")
-    plt.show()
-
-    print(f"{img.shape=}\n{img.shape[0]*img.shape[1]}")
-
-    segment = SegmentImage(img, k=100)
-    segmented_img = segment.segmented_img()
+    segment = SegmentImage(img, k=300, type="grid")
+    segmented_img = segment.segmented_image()
 
     plt.imshow(segmented_img)
     plt.axis("off")
