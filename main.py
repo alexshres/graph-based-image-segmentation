@@ -11,13 +11,11 @@ import pprint
 from utils import get_image
 from segmentation import SegmentImage
 
-def main(img_file, k=200):
-    image_path = "./images/" + img_file
-    print(f"{image_path=}")
+def main(img_file_path, k=200):
 
     # img is between 0 and 1 and Gaussian blur with
     # sigma=0.8 has already been applied in the get_image function
-    img = get_image(image_path)
+    img = get_image(img_file_path)
 
     segment = SegmentImage(img, k=200, type="nn")
     segmented_img = segment.segmented_image()
