@@ -153,3 +153,39 @@ def build_grid_adj_list(image, connectivity=4):
 
     return adjacency_sorted
 
+def rgb2lab(img_RGB):
+    '''
+    convert image color space RGB to Lab
+    '''
+    # Ensure input is float32 and copy to avoid modifying original
+    img_RGB = img_RGB.astype(np.float32)
+    
+    # RGB to LMS
+    rgb_lms_conv = np.array([[0.3811, 0.5783, 0.0402],
+                            [0.1967, 0.7244, 0.0782],
+                            [0.0241, 0.1288, 0.8444]], dtype=np.float32)
+    
+    # Convert to LMS space
+    img_LMS = np.zeros_like(img_RGB, dtype=np.float32)
+    for i in range(3):
+        img_LMS[:,:,i] = (rgb_lms_conv[i,0] * img_RGB[:,:,0] + 
+                         rgb_lms_conv[i,1] * img_RGB[:,:,1] + 
+                         rgb_lms_conv[i,2] * img_RGB[:,:,2])
+    
+    # Take log of LMS values
+    eps = 1e-8
+    img_LMS = np.log10(img_LMS + eps)
+    
+    # Convert LMS to Lab
+    img_Lab = np.zeros_like(img_LMS, dtype=np.float32)
+    
+    # L = (1/√3)(l + m + s)
+    img_Lab[:,:,0] = (1.0/np.sqrt(3.0)) * (img_LMS[:,:,0] + img_LMS[:,:,1] + img_LMS[:,:,2])
+    
+    # a = (1/√6)(l + m - 2s)
+    img_Lab[:,:,1] = (1.0/np.sqrt(6.0)) * (img_LMS[:,:,0] + img_LMS[:,:,1] - 2*img_LMS[:,:,2])
+    
+    # b = (1/√2)(l - m)
+    img_Lab[:,:,2] = (1.0/np.sqrt(2.0)) * (img_LMS[:,:,0] - img_LMS[:,:,1])
+    
+    return img_Lab
