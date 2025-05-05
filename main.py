@@ -11,6 +11,7 @@ import pprint
 from utils import get_image
 from segmentation import SegmentImage
 
+
 def main(img_file_path, k=200):
 
     # img is between 0 and 1 and Gaussian blur with

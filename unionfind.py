@@ -1,5 +1,7 @@
 # FILE: unionfind.py
+
 import numpy as np
+
 
 
 class Node:

@@ -3,6 +3,7 @@ import unionfind as uf
 
 from utils import * 
 
+
 class SegmentImage:
     def __init__(self, image, k=300, num_neighbors=10, type='grid'):
         self.image = image
