@@ -27,6 +27,8 @@ class SegmentImage:
         Builds the segmentation
         """
         
+        assert self.adjacency_list is not None
+
         self.adjacency_list = self.adjacency_list[np.argsort(self.adjacency_list[:, 2])]
 
         for i in range(len(self.adjacency_list)):

@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) == 3:
         k = sys.argv[2]
-        main(image_file, k)
+        main(image_file, int(k))
     else:
         main(image_file)
 

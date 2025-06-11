@@ -3,6 +3,10 @@
 
 import cv2
 import numpy as np
+import scipy.sparse as sp
+
+from scipy.sparse import csr_matrix
+from scipy.sparse.linalg import eigsh
 from annoy import AnnoyIndex
 
 def get_image(path):
@@ -42,11 +46,11 @@ def get_neighbors(image, n_trees):
     coords_to_stack = [None for i in range(num_pixels)]
 
     for i in range(num_pixels):
-        coords_to_stack[i] = flattened_to_coordinates(image.shape[1], i)
+        coords_to_stack[i] = flattened_to_coordinates(image.shape[1], i) # type: ignore
 
         # Making sure coordinates are also in range 0-1
-        coords_to_stack[i][0] = coords_to_stack[i][0] / float(image.shape[0]) 
-        coords_to_stack[i][1] = coords_to_stack[i][1] / float(image.shape[1]) 
+        coords_to_stack[i][0] = coords_to_stack[i][0] / float(image.shape[0])  # type: ignore
+        coords_to_stack[i][1] = coords_to_stack[i][1] / float(image.shape[1])  # type: ignore
 
     features = np.hstack((np.array(coords_to_stack), rgb_features))
 
@@ -94,6 +98,36 @@ def build_nn_adj_list(ann_idx, num_pixels, k):
 
     return adj_sorted
 
+
+def solve_normalized_cuts(W, D, num_segments=2):
+    """
+    Solve normalized cuts using symmetric normalized Laplacian
+    """
+
+    degrees = np.array(D.diagonal()).flatten()
+
+    # adding small regularization for zero degrees
+    degrees[degrees == 0] = 1e-8
+
+    d_inv_sqrt = 1.0 / np.sqrt(degrees)
+    D_inv_sqrt = sp.diags(d_inv_sqrt, format="csr")
+
+    # symmetric normalized Laplacian: L_sym = D^(-1/2)*L*D^(-1/2)
+    L = D - W
+    L_sym = D_inv_sqrt @ L @ D_inv_sqrt
+
+    # solve eigenvalue problem
+    try:
+        eigenvals, eigenvecs = eigsh(L_sym, k=num_segments, which="SM", sigma=0.0)
+        
+        # transform eigenvectors back: y = D^(-1/2)*v
+        eigenvecs_transformed = D_inv_sqrt @ eigenvecs
+
+        return eigenvals, eigenvecs_transformed
+
+    except Exception as e:
+        print(f"Eigenvalue computation failed: {e}")
+        return None, None
 
 
 def build_grid_adj_list(image, connectivity=4):
