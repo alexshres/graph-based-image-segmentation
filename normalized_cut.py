@@ -107,4 +107,59 @@ class NormalizedCut:
 
         return eigenvecs
 
+
+    def _recursive_partition(self, W, pixel_indices, max_segments, current_segments):
+        """
+        Recursively partitioning untils desired number of segments 
+        """
+
+        if current_segments >= max_segments or len(pixel_indices) < 10:
+            return [pixel_indices]
+
+        sub_W = W[np.ix_(pixel_indices, pixel_indices)]
+
+        try:
+            fiedler_vector = self._solver(sub_W, k=2)
+            fiedler_vector = fiedler_vector[:, 1]
+        except Exception:
+            return [pixel_indices]
+
+        threshold = np.median(fiedler_vector)
+
+        # splitting based on fiedler
+        mask = fiedler_vector > threshold
+        group1 = pixel_indices[mask]
+        group2 = pixel_indices[~mask]
+
+        if len(group1) < 5 or len(group2) < 5:
+            return [pixel_indices]
+
+        segments = []
+
+        segments.extend(self._recursive_partition(W, group1, max_segments, current_segments+1))
+        segments.extend(self._recursive_partition(W, group2, max_segments, current_segments+1))
+
+        return segments
+
+
+    def segment(self, image, ann_idx, n_segments=2):
+        """
+        Actual segmentation using normalized cut segmentation 
+
+        image: image to segment
+        ann_idx: ANNOY index 
+        n_segments: number of segments to create
+
+        Returns a segmentation (numpy array of shape [height, width]) with segment labels
+        """
+
+        height, width = image.shape[:2]
+        num_pixels = height * width
+
+        print(f"Building affinity matrix for {num_pixels} pixels")
+
+        W = self._build_affinity_matrix(image, ann_idx)
+
+        print(f"Affinity matrix built: {W.shape}, nnz: {W.nnz}")
+
         
