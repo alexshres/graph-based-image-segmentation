@@ -68,3 +68,43 @@ class NormalizedCut:
         W = (W + W.T)/2
 
         return W
+
+    def _solver(self, W, k=2):
+        """
+        Solves the generalized eigenvalue problem: (D-W)y = aDy 
+
+        W: sparse affinity matrix
+        k: number of eigenvectors to compute (second one has the split information called Fiedler vector)
+
+        Returns eigenvectors corresponding to the k smalles eigenvalues
+        """
+
+        # degree matrix
+        degrees = np.array(W.sum(axis=1)).flatten()
+
+        # regularization
+        degrees = degrees + 1e-12
+
+        D = diags(degrees, format='csr')
+
+
+        # normalized Laplacian: L_norm = D^(-1/2)*(D-W)*D^(-1/2)
+        sqrt_degrees = np.sqrt(degrees)
+        D_neg_sqrt = diags(1.0 / sqrt_degrees, format='csr')
+
+        L = D-W
+        L_norm = D_neg_sqrt @ L @ D_neg_sqrt
+
+        # Suggestion from AI
+        try:
+            eigenvals, eigenvecs = eigsh(L_norm, k=k, which="SM", sigma=0)
+        except Exception:
+            eigenvals, eigenvecs = eigsh(L_norm, k=k, which="SA")
+
+
+        for i in range(k):
+            eigenvecs[:, i] = eigenvecs[:, i] / sqrt_degrees
+
+        return eigenvecs
+
+        
