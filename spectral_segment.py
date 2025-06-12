@@ -4,15 +4,14 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import SpectralClustering
 from utils import get_image
 
-class NormalizedCuts:
+class SpectralSegmentation:
     def __init__(self, n_clusters=8, n_neighbors=10, random_state=42):
         """
-        Using sklearn's normalized cuts for image segmentation since custom normalized
-        cut algorithm takes ~18 mins to run on a 480x320 image
+        Using sklearn's spectral clustering for image segmentation
         
         n_clusters: number of segments
-        n_neighbors: number of neighbors for knn graph (much smaller than our custom implementation)
-        gamma: scaling factor for rbf kernel (higher = more local connections)
+        n_neighbors: number of neighbors for knn graph
+        gamma: scaling factor for rbf kernel
         random_state: for reproducibility
         """
         self.n_clusters = n_clusters
