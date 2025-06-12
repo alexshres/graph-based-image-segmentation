@@ -208,7 +208,7 @@ class NormalizedCut:
 
         n_segments = len(np.unique(segmentation))
 
-        colors = plt.cm.tab10(np.linspace(0, 1, n_segments))
+        colors = plt.cm.tab10(np.linspace(0, 1, n_segments)) # type: ignore
 
         colored_seg = np.zeros((height, width, 3))
         for i, color in enumerate(colors):
