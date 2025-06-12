@@ -9,7 +9,7 @@ from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import eigsh
 from annoy import AnnoyIndex
 
-def get_image(path):
+def get_image(path, blur=True):
     """
     Grabs image from path returns it
     in RGB format normalized between 0 and 1
@@ -22,9 +22,10 @@ def get_image(path):
     img = img/255.0
     sigma = 0.8 # based on the paper
 
-    blurred_img = cv2.GaussianBlur(img, (0, 0), sigma)
+    if blur:
+        img = cv2.GaussianBlur(img, (0, 0), sigma)
 
-    return np.clip(blurred_img, 0.0, 1.0)
+    return np.clip(img, 0.0, 1.0)
 
 def flattened_to_coordinates(width, idx):
     col = idx % width

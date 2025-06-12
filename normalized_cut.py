@@ -1,8 +1,10 @@
-import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
 from scipy.sparse import csr_matrix, diags
 from scipy.sparse.linalg import eigsh
+
+from utils import get_image, get_neighbors
 
 
 class NormalizedCut:
@@ -162,4 +164,79 @@ class NormalizedCut:
 
         print(f"Affinity matrix built: {W.shape}, nnz: {W.nnz}")
 
+        if n_segments == 2:
+            eigenvecs = self._solver(W, k=2)
+            fiedler_vector = eigenvecs[:, 1]
+
+            threshold = np.median(fiedler_vector)
+            labels = (fiedler_vector > threshold).astype(int)
+
+        else:
+            pixel_indices = np.arange(num_pixels)
+            segments = self._recursive_partition(W, pixel_indices, n_segments, 1)
+
+            labels = np.zeros(num_pixels, dtype=int)
+            for i, segment in enumerate(segments):
+                labels[segment] = i
+
+            segmentation = labels.reshape(height, width)
+
+            return segmentation
+
+    def segment_image(self, image, n_segments=2):
+        """
+        Given an image segments image into n_segments 
+
+        Returns the segmented result
+        """
+
+        ann_idx = get_neighbors(image, self.n_trees)
+
+        segmentation = self.segment(image, ann_idx, n_segments)
+
+        return segmentation
+
+    
+    def visualize_segmentation(self, segmentation):
+        """
+        Visualizing using matplotlib the segmented image and the original image 
+
+        Returns image with color segmentation
+        """
+
+        height, width = segmentation.shape
+
+        n_segments = len(np.unique(segmentation))
+
+        colors = plt.cm.tab10(np.linspace(0, 1, n_segments))
+
+        colored_seg = np.zeros((height, width, 3))
+        for i, color in enumerate(colors):
+            mask = segmentation == i
+            colored_seg[mask] = color[:3]
         
+
+        return colored_seg
+
+
+ncut = NormalizedCut(sigma_I=0.1, sigma_X=0.1, k_neighbors=50)
+image_path = "images/elephant.jpg"
+image = get_image(image_path, blur=False)
+segmentation = ncut.segment_image(image)
+colored_seg = ncut.visualize_segmentation(segmentation)
+
+fig, axes = plt.subplots(1, 3, figsize=(15, 12))
+
+axes[0].imshow(image)
+axes[0].set_title("Original Image")
+
+axes[1].imshow(segmentation, cmap='tab10')
+axes[1].set_title("Segmentation")
+
+axes[2].imshow(colored_seg)
+axes[2].set_title("Colored Segmentation")
+
+for a in axes:
+    a.axis('off')
+
+plt.show()
