@@ -3,13 +3,10 @@
 
 import cv2
 import numpy as np
-import scipy.sparse as sp
 
-from scipy.sparse import csr_matrix
-from scipy.sparse.linalg import eigsh
 from annoy import AnnoyIndex
 
-def get_image(path, blur=True):
+def get_image(path):
     """
     Grabs image from path returns it
     in RGB format normalized between 0 and 1
@@ -20,10 +17,6 @@ def get_image(path, blur=True):
 
     img = img.astype(np.float32)
     img = img/255.0
-    sigma = 0.8 # based on the paper
-
-    if blur:
-        img = cv2.GaussianBlur(img, (0, 0), sigma)
 
     return np.clip(img, 0.0, 1.0)
 
@@ -35,6 +28,9 @@ def flattened_to_coordinates(width, idx):
 
 
 def get_neighbors(image, n_trees):
+    """
+    Getting neighbors of each pixel using ANNOY library 
+    """
     img_to_manip = np.copy(image)
 
     num_pixels = image.shape[0] * image.shape[1]
@@ -100,37 +96,6 @@ def build_nn_adj_list(ann_idx, num_pixels, k):
     return adj_sorted
 
 
-def solve_normalized_cuts(W, D, num_segments=2):
-    """
-    Solve normalized cuts using symmetric normalized Laplacian
-    """
-
-    degrees = np.array(D.diagonal()).flatten()
-
-    # adding small regularization for zero degrees
-    degrees[degrees == 0] = 1e-8
-
-    d_inv_sqrt = 1.0 / np.sqrt(degrees)
-    D_inv_sqrt = sp.diags(d_inv_sqrt, format="csr")
-
-    # symmetric normalized Laplacian: L_sym = D^(-1/2)*L*D^(-1/2)
-    L = D - W
-    L_sym = D_inv_sqrt @ L @ D_inv_sqrt
-
-    # solve eigenvalue problem
-    try:
-        eigenvals, eigenvecs = eigsh(L_sym, k=num_segments, which="SM", sigma=0.0)
-        
-        # transform eigenvectors back: y = D^(-1/2)*v
-        eigenvecs_transformed = D_inv_sqrt @ eigenvecs
-
-        return eigenvals, eigenvecs_transformed
-
-    except Exception as e:
-        print(f"Eigenvalue computation failed: {e}")
-        return None, None
-
-
 def build_grid_adj_list(image, connectivity=4):
     """
     Builds an adjacency list for a grid-based image segmentation.
@@ -187,40 +152,3 @@ def build_grid_adj_list(image, connectivity=4):
     adjacency_sorted = adjacency_arr[adjacency_arr[:, 2].argsort()]
 
     return adjacency_sorted
-
-def rgb2lab(img_RGB):
-    '''
-    convert image color space RGB to Lab
-    '''
-    # Ensure input is float32 and copy to avoid modifying original
-    img_RGB = img_RGB.astype(np.float32)
-    
-    # RGB to LMS
-    rgb_lms_conv = np.array([[0.3811, 0.5783, 0.0402],
-                            [0.1967, 0.7244, 0.0782],
-                            [0.0241, 0.1288, 0.8444]], dtype=np.float32)
-    
-    # Convert to LMS space
-    img_LMS = np.zeros_like(img_RGB, dtype=np.float32)
-    for i in range(3):
-        img_LMS[:,:,i] = (rgb_lms_conv[i,0] * img_RGB[:,:,0] + 
-                         rgb_lms_conv[i,1] * img_RGB[:,:,1] + 
-                         rgb_lms_conv[i,2] * img_RGB[:,:,2])
-    
-    # Take log of LMS values
-    eps = 1e-8
-    img_LMS = np.log10(img_LMS + eps)
-    
-    # Convert LMS to Lab
-    img_Lab = np.zeros_like(img_LMS, dtype=np.float32)
-    
-    # L = (1/√3)(l + m + s)
-    img_Lab[:,:,0] = (1.0/np.sqrt(3.0)) * (img_LMS[:,:,0] + img_LMS[:,:,1] + img_LMS[:,:,2])
-    
-    # a = (1/√6)(l + m - 2s)
-    img_Lab[:,:,1] = (1.0/np.sqrt(6.0)) * (img_LMS[:,:,0] + img_LMS[:,:,1] - 2*img_LMS[:,:,2])
-    
-    # b = (1/√2)(l - m)
-    img_Lab[:,:,2] = (1.0/np.sqrt(2.0)) * (img_LMS[:,:,0] - img_LMS[:,:,1])
-    
-    return img_Lab

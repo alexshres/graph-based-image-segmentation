@@ -5,7 +5,7 @@ from sklearn.cluster import SpectralClustering
 from utils import get_image
 
 class NormalizedCuts:
-    def __init__(self, n_clusters=2, n_neighbors=10, gamma=1.0, random_state=42):
+    def __init__(self, n_clusters=8, n_neighbors=10, random_state=42):
         """
         Using sklearn's normalized cuts for image segmentation since custom normalized
         cut algorithm takes ~18 mins to run on a 480x320 image
@@ -17,7 +17,6 @@ class NormalizedCuts:
         """
         self.n_clusters = n_clusters
         self.n_neighbors = n_neighbors
-        self.gamma = gamma
         self.random_state = random_state
     
     def segment(self, image):
@@ -51,19 +50,11 @@ class NormalizedCuts:
         return labels.reshape(height, width)
 
 
-    def segmented_image(self, image):
-        """
-        Segment image from file path
-        
-        Returns the segmented version of the image 
-        """
-        
+    def visualize_segmentation(self, image):
+        """Visualize segmentation results"""
+
         segmentation = self.segment(image)
 
-        return segmentation
-    
-    def visualize_segmentation(self, segmentation):
-        """Visualize segmentation results"""
         height, width = segmentation.shape
         n_segments = len(np.unique(segmentation))
         
@@ -77,25 +68,3 @@ class NormalizedCuts:
             colored_seg[mask] = color[:3]
         
         return colored_seg
-
-
-image_path = "images/elephant.jpg"
-image = get_image(image_path, blur=False)
-
-ncut = NormalizedCuts(n_clusters=8)
-segmentation = ncut.segmented_image(image)
-colored_seg = ncut.visualize_segmentation(segmentation)
-
-fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-
-axes[0].imshow(image)
-axes[0].set_title("Original")
-
-axes[2].imshow(colored_seg, cmap='tab10')
-axes[2].set_title("Colored Segmentation")
-
-for a in axes:
-    a.axis('off')
-
-plt.show()
-

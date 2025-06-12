@@ -8,7 +8,7 @@ from utils import get_image, get_neighbors
 
 
 class NormalizedCut:
-    def __init__(self, sigma_I=0.1, sigma_X=0.1, k_neighbors=50, n_trees=10):
+    def __init__(self, sigma_I=0.1, sigma_X=0.1, k_neighbors=50, n_clusters= 2, n_trees=10):
         """
         Normalized Cut Segmentation algorithm by Shi and Malik 
 
@@ -22,6 +22,7 @@ class NormalizedCut:
         self.sigma_X = sigma_X
         self.k_neighbors = k_neighbors
         self.n_trees = n_trees
+        self.n_clusters = n_clusters
 
 
     def _build_affinity_matrix(self, image, ann_idx):
@@ -183,26 +184,16 @@ class NormalizedCut:
 
             return segmentation
 
-    def segment_image(self, image, n_segments=2):
-        """
-        Given an image segments image into n_segments 
-
-        Returns the segmented result
-        """
-
-        ann_idx = get_neighbors(image, self.n_trees)
-
-        segmentation = self.segment(image, ann_idx, n_segments)
-
-        return segmentation
-
-    
-    def visualize_segmentation(self, segmentation):
+   
+    def visualize_segmentation(self, image):
         """
         Visualizing using matplotlib the segmented image and the original image 
 
         Returns image with color segmentation
         """
+
+        ann_index = get_neighbors(image, self.n_trees)
+        segmentation = self.segment(image, ann_index, self.n_clusters)
 
         height, width = segmentation.shape
 
@@ -219,24 +210,21 @@ class NormalizedCut:
         return colored_seg
 
 
-ncut = NormalizedCut(sigma_I=0.1, sigma_X=0.1, k_neighbors=50)
-image_path = "images/elephant.jpg"
-image = get_image(image_path, blur=False)
-segmentation = ncut.segment_image(image)
-colored_seg = ncut.visualize_segmentation(segmentation)
+# Example of using the above
 
-fig, axes = plt.subplots(1, 3, figsize=(15, 12))
+# ncut = NormalizedCut(sigma_I=0.1, sigma_X=0.1, k_neighbors=50)
+# image_path = "images/elephant.jpg"
+# image = get_image(image_path)
+# segmentation = ncut.visualize_segmentation(image)
 
-axes[0].imshow(image)
-axes[0].set_title("Original Image")
+# fig, axes = plt.subplots(1, 2, figsize=(15, 12))
 
-axes[1].imshow(segmentation, cmap='tab10')
-axes[1].set_title("Segmentation")
+# axes[0].imshow(image)
+# axes[0].set_title("Original Image")
+# axes[1].imshow(segmentation)
+# axes[1].set_title("Colored Segmentation")
 
-axes[2].imshow(colored_seg)
-axes[2].set_title("Colored Segmentation")
+# for a in axes:
+#     a.axis('off')
 
-for a in axes:
-    a.axis('off')
-
-plt.show()
+# plt.show()
